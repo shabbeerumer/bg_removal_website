@@ -27,7 +27,10 @@ Social Media: Quickly remove backgrounds for profile pictures or creative posts.
 Graphic Design: A handy tool for designers to enhance their projects.
 Screenshots
 Upload Interface
+
+
 ![image](https://github.com/user-attachments/assets/2689cdf5-2928-46fb-a2dc-a310129e953b)
+
 
 API Integration
 This project uses the Remove.bg API to remove backgrounds from images. Learn more about this API and its capabilities on the Remove.bg API Documentation.
