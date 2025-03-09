@@ -1,4 +1,4 @@
-![image](https://github.com/user-attachments/assets/5a85ac4c-50f5-4917-8308-64c31048eefa)<<<<<<< HEAD
+<<<<<<< HEAD
 # Background Remover Pro
 
 A modern, professional web application that removes backgrounds from images using AI technology. Built with HTML, CSS, and JavaScript, featuring a clean and intuitive user interface.
