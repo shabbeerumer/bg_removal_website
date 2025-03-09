@@ -157,7 +157,8 @@ Screenshots
 Upload Interface
 
 
-![image](https://github.com/user-attachments/assets/2689cdf5-2928-46fb-a2dc-a310129e953b)
+![image](https://github.com/user-attachments/assets/2760cfd9-5c8a-4f5a-acb4-35f256faeecf)
+
 
 
 API Integration
