@@ -3,7 +3,8 @@
 
 A modern, professional web application that removes backgrounds from images using AI technology. Built with HTML, CSS, and JavaScript, featuring a clean and intuitive user interface.
 
-![Background Remover Pro]((https://github.com/user-attachments/assets/c9c494b3-1e1d-4c77-89f5-bd06b8bd907b)) <!-- You can add a screenshot of your application here -->
+![Background Remover Pro](https://github.com/user-attachments/assets/bb144a9f-818d-4236-9da2-1326d7e80f62)
+ <!-- You can add a screenshot of your application here -->
 
 ## Features
 
