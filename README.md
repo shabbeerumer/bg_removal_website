@@ -36,7 +36,7 @@ A modern, professional web application that removes backgrounds from images usin
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/yourusername/background-remover-pro.git
+git clone https://github.com/shabbeerumer/background-remover-pro.git
 cd background-remover-pro
 ```
 
