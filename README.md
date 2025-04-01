@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # Background Remover Pro
 
 A modern, professional web application that removes backgrounds from images using AI technology. Built with HTML, CSS, and JavaScript, featuring a clean and intuitive user interface.
@@ -166,4 +165,3 @@ This project uses the Remove.bg API to remove backgrounds from images. Learn mor
 
 Contributions
 Contributions are welcome! Fork this repository, make changes, and submit a pull request.
->>>>>>> 5f3eac16125f36d31542998e0f54f5b34081f12f
