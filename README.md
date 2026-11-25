@@ -40,12 +40,13 @@ git clone https://github.com/shabbeerumer/background-remover-pro.git
 cd background-remover-pro
 ```
 
-2. Replace the API key in `first.html`:
+2. Replace the API key in `index.html` (`REMOVE_BG_API_KEY`):
 ```javascript
-headers: { "X-Api-Key": "your-api-key-here" }
+const REMOVE_BG_API_KEY = "your-api-key-here";
 ```
+> **Security Note:** For production deployments, proxy Remove.bg API calls through a backend server or serverless function so your API key is not exposed in client-side code.
 
-3. Open `first.html` in your web browser or serve it using a local development server.
+3. Open `index.html` in your web browser or serve it using a local development server.
 
 ## Usage
 
@@ -59,8 +60,8 @@ headers: { "X-Api-Key": "your-api-key-here" }
 
 ```
 background-remover-pro/
-├── first.html        # Main HTML file
-├── first.css         # Styles and animations
+├── index.html        # Main HTML file & client logic
+├── styles.css        # Styles and animations
 └── README.md         # Documentation
 ```
 
@@ -124,44 +125,3 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 - [Remove.bg](https://www.remove.bg) for the background removal API
 - [Bootstrap](https://getbootstrap.com) for the CSS framework
 - [Google Fonts](https://fonts.google.com) for the Inter font family
-=======
-Background Removal Website
-Overview
-This Background Removal Website is a user-friendly tool designed to remove backgrounds from images with ease. Built using HTML, CSS, JavaScript, and Bootstrap 5, the website leverages the Remove.bg API to deliver seamless functionality. Users can upload images, process them, and download the results—all with a responsive and intuitive interface.
-
-Key Features
-Image Upload: Simple file upload option for users.
-Background Removal: Integrates with Remove.bg API for fast and accurate background removal.
-Preview Functionality: Displays the processed image directly on the webpage.
-Download Option: Download the image without background effortlessly.
-Responsive Design: Fully functional on desktop, tablet, and mobile devices.
-Tech Stack
-Frontend:
-HTML5
-CSS3
-JavaScript
-Bootstrap 5
-API:
-Remove.bg API
-How It Works
-Upload: Select an image from your device.
-Process: The app sends the image to the Remove.bg API for processing.
-Preview: The processed image is displayed without a background.
-Download: Download the new image to your device.
-Use Cases
-E-commerce: Perfect for creating clean product images.
-Social Media: Quickly remove backgrounds for profile pictures or creative posts.
-Graphic Design: A handy tool for designers to enhance their projects.
-Screenshots
-Upload Interface
-
-
-![image](https://github.com/user-attachments/assets/2760cfd9-5c8a-4f5a-acb4-35f256faeecf)
-
-
-
-API Integration
-This project uses the Remove.bg API to remove backgrounds from images. Learn more about this API and its capabilities on the Remove.bg API Documentation.
-
-Contributions
-Contributions are welcome! Fork this repository, make changes, and submit a pull request.

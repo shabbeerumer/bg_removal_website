@@ -29,9 +29,9 @@
                 <div class="row justify-content-center">
                     <div class="col-lg-8">
                         <form class="upload-form">
-                            <div class="upload-area mb-4">
+                            <div class="upload-area mb-4" id="upload-area">
                                 <label for="filepicker" class="upload-label">
-                                    <div class="upload-placeholder">
+                                    <div class="upload-placeholder" id="upload-placeholder">
                                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
                                             fill="currentColor" class="bi bi-cloud-arrow-up" viewBox="0 0 16 16">
                                             <path fill-rule="evenodd"
@@ -42,10 +42,26 @@
                                         <p class="mb-0">Drop your image here or click to upload</p>
                                         <span class="upload-hint">Supports JPG, PNG - Max 10MB</span>
                                     </div>
+                                    <div class="selected-file-preview d-none" id="selected-file-preview">
+                                        <img id="selected-thumbnail" src="" alt="Selected image preview">
+                                        <div class="selected-file-info">
+                                            <span class="selected-badge">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                                                    <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0m-3.97-3.03a.75.75 0 0 0-1.08.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-.01-1.05z"/>
+                                                </svg>
+                                                Image Selected
+                                            </span>
+                                            <p class="selected-file-name mb-1" id="selected-file-name"></p>
+                                            <span class="selected-file-meta" id="selected-file-meta"></span>
+                                            <span class="change-file-hint">Click or drop another image to change</span>
+                                        </div>
+                                    </div>
                                 </label>
                                 <input type="file" class="form-control visually-hidden" id="filepicker"
                                     accept="image/*">
                             </div>
+
+                            <div class="alert alert-danger d-none mb-4" id="status-alert" role="alert"></div>
 
                             <div class="button-group">
                                 <button type="button" class="btn btn-primary btn-lg" onclick="handleupload()">Remove
@@ -72,17 +88,53 @@
 
     <footer class="footer">
         <div class="container">
-            <p class="text-center mb-0">&copy; 2024 Background Remover Pro. All rights reserved.</p>
+            <p class="text-center mb-0">&copy; 2026 Background Remover Pro. All rights reserved.</p>
         </div>
     </footer>
 
     <script>
-        var imageurl;
+        const MAX_FILE_SIZE_BYTES = 10 * 1024 * 1024; // 10MB
+        // Note: For production deployments, proxy API requests through a backend so the API key is not exposed in client code.
+        const REMOVE_BG_API_KEY = "vPrYtws6qFP5ueneTpmNJpVF";
+
+        let imageurl = null;
+        let resultOriginalUrl = null;
+        let selectedPreviewUrl = null;
+
+        const statusAlert = document.getElementById('status-alert');
+        const removeBtn = document.querySelector('.btn-primary');
+
+        function showStatusError(message) {
+            statusAlert.textContent = message;
+            statusAlert.classList.remove('d-none');
+        }
+
+        function clearStatusError() {
+            statusAlert.textContent = '';
+            statusAlert.classList.add('d-none');
+        }
+
+        function validateFile(file) {
+            if (!file) return false;
+            if (!file.type || !file.type.startsWith('image/')) {
+                showStatusError('Please select a valid image file (JPG, PNG, etc.).');
+                return false;
+            }
+            if (file.size > MAX_FILE_SIZE_BYTES) {
+                showStatusError('Image size exceeds the 10MB limit. Please choose a smaller image.');
+                return false;
+            }
+            return true;
+        }
 
         function handleupload() {
+            clearStatusError();
             const fileinput = document.getElementById("filepicker").files[0];
             if (!fileinput) {
-                alert('Please select an image first');
+                showStatusError('Please select an image first.');
+                return;
+            }
+            if (!validateFile(fileinput)) {
                 return;
             }
 
@@ -91,23 +143,36 @@
             formdata.append("size", "auto");
 
             // Show loading state
-            document.querySelector('.btn-primary').disabled = true;
-            document.querySelector('.btn-primary').innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Processing...';
+            removeBtn.disabled = true;
+            removeBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Processing...';
 
             fetch('https://api.remove.bg/v1.0/removebg', {
                 method: 'POST',
-                headers: { "X-Api-Key": "vPrYtws6qFP5ueneTpmNJpVF" },
+                headers: { "X-Api-Key": REMOVE_BG_API_KEY },
                 body: formdata
             })
-                .then(function (response) {
+                .then(async function (response) {
                     if (!response.ok) {
-                        throw new Error('Network response was not ok');
+                        let errorMessage = 'Failed to remove background (HTTP ' + response.status + ').';
+                        try {
+                            const errorData = await response.json();
+                            if (errorData && errorData.errors && errorData.errors.length > 0) {
+                                errorMessage = errorData.errors[0].title || errorMessage;
+                            }
+                        } catch (e) {
+                            // Ignore JSON parse errors on non-JSON responses
+                        }
+                        throw new Error(errorMessage);
                     }
                     return response.blob();
                 })
                 .then(function (blob) {
+                    if (imageurl) URL.revokeObjectURL(imageurl);
+                    if (resultOriginalUrl) URL.revokeObjectURL(resultOriginalUrl);
+
                     const url = URL.createObjectURL(blob);
                     imageurl = url;
+                    resultOriginalUrl = URL.createObjectURL(fileinput);
 
                     // Clear previous results
                     const preview = document.getElementById('image-preview');
@@ -122,7 +187,7 @@
                     originalImg.className = 'result-image original';
                     originalImg.innerHTML = `
             <h3>Original</h3>
-            <img src="${URL.createObjectURL(fileinput)}" alt="Original image">
+            <img src="${resultOriginalUrl}" alt="Original image">
           `;
 
                     // Add processed image
@@ -137,21 +202,24 @@
                     resultContainer.appendChild(processedImg);
                     preview.appendChild(resultContainer);
 
+                    document.getElementById('result-section').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+
                     // Reset button state
-                    document.querySelector('.btn-primary').disabled = false;
-                    document.querySelector('.btn-primary').textContent = 'Remove Background';
+                    removeBtn.disabled = false;
+                    removeBtn.textContent = 'Remove Background';
                 })
                 .catch(function (error) {
                     console.error('Error:', error);
-                    alert('There was an error processing your image. Please try again.');
-                    document.querySelector('.btn-primary').disabled = false;
-                    document.querySelector('.btn-primary').textContent = 'Remove Background';
+                    showStatusError(error.message || 'There was an error processing your image. Please try again.');
+                    removeBtn.disabled = false;
+                    removeBtn.textContent = 'Remove Background';
                 });
         }
 
         function downloadfile() {
+            clearStatusError();
             if (!imageurl) {
-                alert('Please process an image first');
+                showStatusError('Please process an image first before downloading.');
                 return;
             }
             const anchorElement = document.createElement('a');
@@ -162,9 +230,58 @@
             document.body.removeChild(anchorElement);
         }
 
-        // Add drag and drop functionality
-        const uploadArea = document.querySelector('.upload-area');
+        // Add drag and drop functionality and file selection feedback
+        const uploadArea = document.getElementById('upload-area');
         const fileInput = document.getElementById('filepicker');
+        const uploadPlaceholder = document.getElementById('upload-placeholder');
+        const selectedFilePreview = document.getElementById('selected-file-preview');
+        const selectedThumbnail = document.getElementById('selected-thumbnail');
+        const selectedFileName = document.getElementById('selected-file-name');
+        const selectedFileMeta = document.getElementById('selected-file-meta');
+
+        function formatFileSize(bytes) {
+            if (bytes < 1024) return bytes + ' B';
+            if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+            return (bytes / (1024 * 1024)).toFixed(2) + ' MB';
+        }
+
+        function updateSelectedFileUI(file) {
+            if (!file) {
+                uploadArea.classList.remove('has-file');
+                uploadPlaceholder.classList.remove('d-none');
+                selectedFilePreview.classList.add('d-none');
+                if (selectedPreviewUrl) {
+                    URL.revokeObjectURL(selectedPreviewUrl);
+                    selectedPreviewUrl = null;
+                }
+                selectedThumbnail.src = '';
+                return;
+            }
+
+            if (selectedPreviewUrl) {
+                URL.revokeObjectURL(selectedPreviewUrl);
+            }
+            selectedPreviewUrl = URL.createObjectURL(file);
+            selectedThumbnail.src = selectedPreviewUrl;
+            selectedFileName.textContent = file.name;
+            selectedFileMeta.textContent = formatFileSize(file.size) + (file.type ? ' • ' + file.type.replace('image/', '').toUpperCase() : '');
+
+            uploadArea.classList.add('has-file');
+            uploadPlaceholder.classList.add('d-none');
+            selectedFilePreview.classList.remove('d-none');
+        }
+
+        fileInput.addEventListener('change', function () {
+            clearStatusError();
+            if (fileInput.files && fileInput.files[0]) {
+                if (!validateFile(fileInput.files[0])) {
+                    fileInput.value = '';
+                    updateSelectedFileUI(null);
+                    return;
+                }
+                updateSelectedFileUI(fileInput.files[0]);
+            }
+        });
 
         ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
             uploadArea.addEventListener(eventName, preventDefaults, false);
@@ -194,9 +311,19 @@
         uploadArea.addEventListener('drop', handleDrop, false);
 
         function handleDrop(e) {
+            clearStatusError();
             const dt = e.dataTransfer;
             const files = dt.files;
+            if (!files || !files.length) return;
+
+            if (!validateFile(files[0])) {
+                fileInput.value = '';
+                updateSelectedFileUI(null);
+                return;
+            }
+
             fileInput.files = files;
+            updateSelectedFileUI(files[0]);
         }
     </script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
